@@ -34,11 +34,12 @@ class ViewPagerActivity : AppCompatActivity() {
         view_pager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
                 currentPosition = position
+                setResult(Activity.RESULT_OK)
             }
         })
         view_pager.setCurrentItem(currentPosition, false)
 
-        prepareSharedElementTransition()
+        prepareTransition()
     }
 
     private fun createItemList() {
@@ -53,7 +54,7 @@ class ViewPagerActivity : AppCompatActivity() {
         }
     }
 
-    private fun prepareSharedElementTransition() {
+    private fun prepareTransition() {
         setEnterSharedElementCallback(object : SharedElementCallback() {
             override fun onMapSharedElements(names: MutableList<String>?, sharedElements: MutableMap<String, View>?) {
                 val fragment = view_pager.adapter.instantiateItem(view_pager, currentPosition) as Fragment
@@ -69,6 +70,8 @@ class ViewPagerActivity : AppCompatActivity() {
     }
 
     companion object {
+        private const val REQUEST_CODE = 9000
+
         private const val EXTRA_ITEM = "item"
         private const val EXTRA_TRANSITION_NAME = "transition"
 
@@ -79,7 +82,7 @@ class ViewPagerActivity : AppCompatActivity() {
             val options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, targetView, transitionName)
             intent.putExtra(EXTRA_ITEM, item)
             intent.putExtra(EXTRA_TRANSITION_NAME, transitionName)
-            activity.startActivity(intent, options.toBundle())
+            activity.startActivityForResult(intent, REQUEST_CODE, options.toBundle())
         }
     }
 }

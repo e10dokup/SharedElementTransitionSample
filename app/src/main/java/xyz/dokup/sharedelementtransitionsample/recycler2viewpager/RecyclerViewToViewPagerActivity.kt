@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.View
 import kotlinx.android.synthetic.main.activity_recycler_to_view_pager.*
 import xyz.dokup.sharedelementtransitionsample.R
@@ -35,12 +34,12 @@ class RecyclerViewToViewPagerActivity : AppCompatActivity() {
         }
         createItemList()
         ViewPagerActivity.currentPosition = 0
-        supportPostponeEnterTransition()
+
+        prepareTransition()
     }
 
-    override fun onResume() {
-        super.onResume()
-        prepareTransitions()
+    override fun onActivityReenter(resultCode: Int, data: Intent?) {
+        super.onActivityReenter(resultCode, data)
         scrollToPosition()
     }
 
@@ -58,7 +57,7 @@ class RecyclerViewToViewPagerActivity : AppCompatActivity() {
         itemAdapter.notifyDataSetChanged()
     }
 
-    private fun prepareTransitions() {
+    private fun prepareTransition() {
         setExitSharedElementCallback(object : SharedElementCallback() {
             override fun onMapSharedElements(names: MutableList<String>?, sharedElements: MutableMap<String, View>?) {
                 val viewHolder = recycler_view.findViewHolderForAdapterPosition(ViewPagerActivity.currentPosition)
@@ -74,19 +73,21 @@ class RecyclerViewToViewPagerActivity : AppCompatActivity() {
     }
 
     private fun scrollToPosition() {
+        supportPostponeEnterTransition()
         val layoutManager = recycler_view.layoutManager
-        Log.d("aa", ViewPagerActivity.currentPosition.toString())
         val viewAtPosition = layoutManager.findViewByPosition(ViewPagerActivity.currentPosition)
         if (viewAtPosition == null || layoutManager.isViewPartiallyVisible(viewAtPosition, false, true)) {
             recycler_view.addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
                     recycler_view.removeOnScrollListener(this)
+                    prepareTransition()
                     supportStartPostponedEnterTransition()
                 }
             })
             recycler_view.scrollToPosition(ViewPagerActivity.currentPosition)
         } else {
+            prepareTransition()
             supportStartPostponedEnterTransition()
         }
     }
